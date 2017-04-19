@@ -15,7 +15,7 @@ namespace Queuing_Simulation
             int R = 5;
 
             Random rng = new Random();
-
+			//ik heb geen zin meer en krijg last van maagzuur
             // Initialize customers
             double[] arrivalDistributionParameters = new double[] { 2 };
             int customerTypes = arrivalDistributionParameters.Length;
