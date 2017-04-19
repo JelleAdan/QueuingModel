@@ -57,6 +57,7 @@
     <Compile Include="Statistics\GammaDistribution.cs" />
     <Compile Include="Statistics\NormalDistribution.cs" />
     <Compile Include="Visualization\VisualizeTIKZ.cs" />
+    <Compile Include="Statistics\UniformDistribution.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
