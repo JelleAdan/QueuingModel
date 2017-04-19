@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Queuing_Simulation
 {
     public class ExponentialDistribution : Distribution
     {
-        private double lambda;
-        public ExponentialDistribution(Random rng, double lambda)
+		private double lambda { get; set; }
+
+		public ExponentialDistribution(Random rng, double lambda)
         {
             this.rng = rng;
             this.lambda = lambda;
