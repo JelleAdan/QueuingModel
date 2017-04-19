@@ -1,2 +1,0 @@
-# Queuing
-Queuing Simulation Model
