@@ -15,21 +15,11 @@ namespace Queuing_Simulation
             this.rng = rng;
             this.mu = mu;
             this.sigma = sigma;
-        }
-
-        public double GetAverage()
-        {
             average = mu;
-            return average;
-        }
-
-        public double GetVariance()
-        {
             variance = sigma * sigma;
-            return variance;
         }
 
-        public double Next()
+        public override double Next()
         {
             double tmp = new double();
             return tmp;

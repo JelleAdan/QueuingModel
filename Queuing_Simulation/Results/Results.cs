@@ -40,7 +40,7 @@ namespace Queuing_Simulation
             {
                 for(int i = 0; i < nrCustomers; i++)
                 {
-                    configurations[r, i] = new Dictionary<List<int>, int>();
+                    configurations[r, i] = new Dictionary<List<int>, int>(new ListComparer<int>());
                 }
             }
         }
@@ -193,27 +193,24 @@ namespace Queuing_Simulation
         public void PrintConfigurations()
         {
             // Translate configuration count to probability
-
-
-            // Print to .txt
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(string.Concat(Environment.CurrentDirectory, "/Visualization/configurations.txt"), false))
+            for (int r = 0; r < R; r++)
             {
-                for (int r = 0; r < R; r++)
+                for (int cID = 0; cID < nrCustomers; cID++)
                 {
-                    for (int cID = 0; cID < nrCustomers; cID++)
+                    foreach (KeyValuePair<List<int>, int> configuration in configurations[r, cID])
                     {
-                        foreach (KeyValuePair<List<int>, int> configuration in configurations[r, cID])
-                        {
-                            file.Write("Customer " + cID);
-                            file.Write("Server configuration\tP(Server configuration)\n");
-                            foreach (int sID in configuration.Key)
-                            {
-                                file.Write("{0} ", sID);
-                            }
-                            file.Write("\t{0}", String.Format("{0:0.00}", configuration.Value / nrArrivals[r, cID]));
-                        }
+                        configurations[r, cID][configuration.Key] = configurations[r, cID][configuration.Key] / nrArrivals[r, cID];
                     }
                 }
+            }
+
+            for (int r = 0; r < R; r++)
+            {
+                for(int cID = 0; cID < nrCustomers; cID++)
+                {
+
+                }
+                
             }
         }
 
@@ -226,6 +223,24 @@ namespace Queuing_Simulation
                 factorial *= i;
             }
             return factorial;
+        }
+
+        public class ListComparer<T> : IEqualityComparer<List<T>>
+        {
+            public bool Equals(List<T> x, List<T> y)
+            {
+                return x.SequenceEqual(y);
+            }
+
+            public int GetHashCode(List<T> obj)
+            {
+                int hashcode = 0;
+                foreach (T t in obj)
+                {
+                    hashcode ^= t.GetHashCode();
+                }
+                return hashcode;
+            }
         }
     }
 }

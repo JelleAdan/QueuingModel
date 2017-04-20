@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Queuing_Simulation
 {
@@ -15,21 +11,11 @@ namespace Queuing_Simulation
             this.rng = rng;
             this.alpha = alpha;
             this.beta = beta;
-        }
-
-        public double GetAverage()
-        {
             average = alpha / beta;
-            return average;
-        }
-
-        public double GetVariance()
-        {
             variance = alpha / beta / beta;
-            return variance;
         }
 
-        public double Next()
+        public override double Next()
         {
             int k = (int)Math.Floor(alpha);
             double a = alpha - k;

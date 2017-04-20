@@ -10,21 +10,11 @@ namespace Queuing_Simulation
         {
             this.rng = rng;
             this.lambda = lambda;
-        }
-
-        public double GetAverage()
-        {
             average = 1 / lambda;
-            return average;
-        }
-
-        public double GetVariance()
-        {
             variance = 1 / lambda / lambda;
-            return variance;
         }
 
-        public double Next()
+        public override double Next()
         {
             return -Math.Log(rng.NextDouble()) / lambda;
         }

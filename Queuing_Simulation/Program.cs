@@ -1,6 +1,7 @@
 ﻿using Queuing_Simulation.Objects;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Queuing_Simulation
@@ -15,25 +16,24 @@ namespace Queuing_Simulation
             int R = 5;
 
             Random rng = new Random();
-			//ik heb geen zin meer en krijg last van maagzuur
+
             // Initialize customers
-            double[] arrivalDistributionParameters = new double[] { 2 };
+            double[] arrivalDistributionParameters = new double[] { 1 };
             int customerTypes = arrivalDistributionParameters.Length;
-            ExponentialDistribution[] arrivalDistributions = new ExponentialDistribution[arrivalDistributionParameters.GetLength(0)];
+            Distribution[] arrivalDistributions = new Distribution[arrivalDistributionParameters.GetLength(0)];
             for (int i = 0; i < customerTypes; i++)
             {
                 arrivalDistributions[i] = new ExponentialDistribution(rng, arrivalDistributionParameters[i]);
             }
 
             // Initialize servers
-            double[] serviceDistributionParameters = new double[] { 1, 1, 1, 1 };
+            double[] serviceDistributionParameters = new double[] { 1, 1 };
             int serverTypes = serviceDistributionParameters.Length;
-            ExponentialDistribution[] serviceDistributions = new ExponentialDistribution[serviceDistributionParameters.GetLength(0)];
+            Distribution[] serviceDistributions = new Distribution[serviceDistributionParameters.GetLength(0)];
             for (int i = 0; i < serverTypes; i++)
             {
                 serviceDistributions[i] = new ExponentialDistribution(rng, serviceDistributionParameters[i]);
             }
-            
 
             // Server-Customer Eligibility
             bool[][] eligibility = new bool[serverTypes][];
@@ -48,7 +48,7 @@ namespace Queuing_Simulation
             }
 
             // Time span of a run
-            double T = 10E3;
+            double T = 10E4;
 
             Console.WriteLine("Initialization complete. \nSimulation started...");
             Stopwatch stopwatch = new Stopwatch();
