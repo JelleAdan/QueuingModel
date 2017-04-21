@@ -17,8 +17,6 @@ namespace Queuing_Simulation
             // Number of runs
             int R = 6;
 
-            Random rng = new Random();
-
             // Initialize customers
             double[] arrivalDistributionParameters = new double[] { 2 };
             int nrCustomers = arrivalDistributionParameters.Length;

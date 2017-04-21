@@ -196,7 +196,7 @@ namespace Queuing_Simulation
                 file.WriteLine("{0}, {1}", String.Format("{0:0.000)", utilization), String.Format("{0:0.000}", meanW));
             }
 
-                PrintConfigurations();
+            PrintConfigurations();
         }
 
         static IEnumerable<IEnumerable<T>> GetPermutations<T>(IEnumerable<T> list, int length)
