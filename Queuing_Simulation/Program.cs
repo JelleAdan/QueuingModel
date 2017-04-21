@@ -15,32 +15,40 @@ namespace Queuing_Simulation
 			Random rng = new Random();
 
             // Number of runs
-            int R = 5;
+            int R = 6;
 
-			// Initialize customers
-            double[] arrivalDistributionParameters = new double[] { 1 };
-            int customerTypes = arrivalDistributionParameters.Length;
+            Random rng = new Random();
+
+            // Initialize customers
+            double[] arrivalDistributionParameters = new double[] { 2 };
+            int nrCustomers = arrivalDistributionParameters.Length;
             Distribution[] arrivalDistributions = new Distribution[arrivalDistributionParameters.GetLength(0)];
-            for (int i = 0; i < customerTypes; i++)
+            for (int i = 0; i < nrCustomers; i++)
             {
                 arrivalDistributions[i] = new ExponentialDistribution(rng, arrivalDistributionParameters[i]);
             }
 
             // Initialize servers
-            double[] serviceDistributionParameters = new double[] { 1, 1 };
-            int serverTypes = serviceDistributionParameters.Length;
+            double[] serviceDistributionParameters = new double[] { 1, 1, 1, 1 };
+            int nrServers = serviceDistributionParameters.Length;
             Distribution[] serviceDistributions = new Distribution[serviceDistributionParameters.GetLength(0)];
-            for (int i = 0; i < serverTypes; i++)
+            for (int i = 0; i < nrServers; i++)
             {
                 serviceDistributions[i] = new ExponentialDistribution(rng, serviceDistributionParameters[i]);
             }
 
+            // Determine utilization M|G|c
+            double averageServiceTime = new double();
+            for(int i = 0; i < nrServers; i++) { averageServiceTime += serviceDistributions[i].average; }
+            averageServiceTime = averageServiceTime / nrServers;
+            double utilization = arrivalDistributionParameters[0] * averageServiceTime / nrServers;
+
             // Server-Customer Eligibility
-            bool[][] eligibility = new bool[serverTypes][];
-            for (int i = 0; i < serverTypes; i++) 
+            bool[][] eligibility = new bool[nrServers][];
+            for (int i = 0; i < nrServers; i++) 
             {
-                bool[] tmp = new bool[customerTypes];
-                for (int j = 0; j < customerTypes; j++) 
+                bool[] tmp = new bool[nrCustomers];
+                for (int j = 0; j < nrCustomers; j++) 
                 {
                     tmp[j] = true;
                 }
@@ -48,13 +56,13 @@ namespace Queuing_Simulation
             }
 
             // Time span of a run
-            double T = 10E4;
+            double T = 10E2;
 
             Console.WriteLine("Initialization complete. \nSimulation started...");
             Stopwatch stopwatch = new Stopwatch();
             double elapsedTime = new double();
 
-            Results results = new Results(R, serverTypes, customerTypes);
+            Results results = new Results(R, nrServers, nrCustomers);
 
             // Number of threads n + 1, where n is the number of cores
             Parallel.For(0, R, new ParallelOptions { MaxDegreeOfParallelism = 3 }, r =>
@@ -65,7 +73,7 @@ namespace Queuing_Simulation
                 double t = 0;
 
                 FutureEvents futureEvents = new FutureEvents();
-                for (int i = 0; i < customerTypes; i++) 
+                for (int i = 0; i < nrCustomers; i++) 
                 {
                     Customer customer = new Customer(i);
                     futureEvents.Add(new Event(Event.ARRIVAL, arrivalDistributions[i].Next(), customer));
@@ -74,7 +82,7 @@ namespace Queuing_Simulation
                 CustomerQueue customerQueue = new CustomerQueue();
 
                 ServerQueue idleServerQueue = new ServerQueue();
-                for (int i = 0; i < serverTypes; i++) 
+                for (int i = 0; i < nrServers; i++) 
                 {
                     Server server = new Server(i, eligibility[i]);
                     idleServerQueue.Add(server);

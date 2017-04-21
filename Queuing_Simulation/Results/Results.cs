@@ -20,7 +20,7 @@ namespace Queuing_Simulation
         private double[] sumS { get; set; }
         private double[] sumW { get; set; }
         private double[] wait { get; set; }
-        private Dictionary<List<int>, int>[,] configurations { get; set; }
+        private Dictionary<List<int>, double>[,] configurations { get; set; }
 
         public Results(int R, int nrServers, int nrCustomers)
         {
@@ -35,12 +35,12 @@ namespace Queuing_Simulation
             sumS = new double[R];
             sumW = new double[R];
             wait = new double[R];
-            configurations = new Dictionary<List<int>, int>[R, nrCustomers];
+            configurations = new Dictionary<List<int>, double>[R, nrCustomers];
             for(int r = 0; r < R; r++)
             {
                 for(int i = 0; i < nrCustomers; i++)
                 {
-                    configurations[r, i] = new Dictionary<List<int>, int>(new ListComparer<int>());
+                    configurations[r, i] = new Dictionary<List<int>, double>(new ListComparer<int>());
                 }
             }
         }
@@ -86,7 +86,7 @@ namespace Queuing_Simulation
             time[r] = e.time;
         }
 
-        public void GetMeans(double lambda = 0.5, double mu = 0.5)
+        public void GetMeans(double[] arrivalDistributionParameters, double[] serviceDistributionParameters)
         {
             int[] nrArrivalsTotal = new int[R];
             int[] nrDeparturesTotal = new int[R];
@@ -145,6 +145,10 @@ namespace Queuing_Simulation
             double ciPW = 1.96 * sigmaPW / Math.Sqrt(R);
 
             // Theoretic M|M|c
+            // Only works when all lambda and mu are identical!
+            #region
+            double lambda = arrivalDistributionParameters[0];
+            double mu = serviceDistributionParameters[0];
             double rho = lambda / mu / nrServers;
             double tmp = new double();
             if (nrServers > 1)
@@ -165,6 +169,7 @@ namespace Queuing_Simulation
             double theoreticW = theoreticPW / (1 - rho) / (nrServers * mu);
             theoreticW = theoreticPW / (nrServers * mu) + theoreticLq / (nrServers * mu);
             double theoreticS = (rho / (1 - rho) * theoreticPW + nrServers * rho) / lambda;
+            #endregion
 
             Console.WriteLine("\t\t\t\tSimulation\t\t\tTheoretic");
             Console.WriteLine("E(customers in the system):\t{0} \u00B1 {1} (95% C.I.)\t{2}", String.Format("{0:0.0000}", meanLs), String.Format("{0:0.0000}", ciLs), String.Format("{0:0.0000}", theoreticLs));
@@ -186,32 +191,100 @@ namespace Queuing_Simulation
                 file.WriteLine("P(wait):\t\t\t{0} \u00B1 {1} (95% C.I.)\t{2}", String.Format("{0:0.00000000}", meanPW), String.Format("{0:0.00000000}", ciPW), String.Format("{0:0.00000000}", theoreticPW));
             }
 
-            //TEST
-            PrintConfigurations();
+            using(System.IO.StreamWriter file = new System.IO.StreamWriter(string.Concat(Environment.CurrentDirectory, "/Visualization/waitingtimeversusutilization.txt"), true))
+            {
+                file.WriteLine("{0}, {1}", String.Format("{0:0.000)", utilization), String.Format("{0:0.000}", meanW));
+            }
+
+                PrintConfigurations();
         }
+
+        static IEnumerable<IEnumerable<T>> GetPermutations<T>(IEnumerable<T> list, int length)
+        {
+            if (length == 1) return list.Select(t => new T[] { t });
+            return GetPermutations(list, length - 1).SelectMany(t => list.Where(e => !t.Contains(e)), (t1, t2) => t1.Concat(new T[] { t2 }));
+        }
+
+        static IEnumerable<IEnumerable<T>> GetPermutationsWithRepetition<T>(IEnumerable<T> list, int length)
+        {
+            if (length == 1) return list.Select(t => new T[] { t });
+            return GetPermutationsWithRepetition(list, length - 1).SelectMany(t => list, (t1, t2) => t1.Concat(new T[] { t2 }));
+        }
+
+        //static T ElementAtOrDefault<T>(this IList<T> list, int index, T @default)
+        //{
+        //    return index >= 0 && index < list.Count ? list[index] : @default;
+        //}
 
         public void PrintConfigurations()
         {
+            // Determine all possible configurations
+            double tmp = new double();
+            for (int i = 2; i <= nrServers; i++) { tmp += 1.0 / Factorial(i); }
+            int nrConfigurations = (int)(2 * Factorial(nrServers) + Factorial(nrServers) * tmp);
+            HashSet<List<int>> possibleConfigurations = new HashSet<List<int>>();
+            //new ListComparer<int>()
+            for (int r = 0; r < R; r++) 
+            {
+                for (int cID = 0; cID < nrCustomers; cID++) 
+                {
+                    foreach(KeyValuePair<List<int>, double> configuration in configurations[r, cID])
+                    {
+                        possibleConfigurations.Add(configuration.Key);
+                        if(possibleConfigurations.Count == nrConfigurations) { goto Proceed; }
+                    }
+                }
+            }
+            Proceed:
             // Translate configuration count to probability
             for (int r = 0; r < R; r++)
             {
                 for (int cID = 0; cID < nrCustomers; cID++)
                 {
-                    foreach (KeyValuePair<List<int>, int> configuration in configurations[r, cID])
+                    foreach(List<int> configuration in possibleConfigurations)
                     {
-                        configurations[r, cID][configuration.Key] = configurations[r, cID][configuration.Key] / nrArrivals[r, cID];
+                        configurations[r, cID][configuration] = configurations[r, cID][configuration] / nrArrivals[r, cID];
                     }
                 }
             }
-
-            for (int r = 0; r < R; r++)
+            // Determine mean configuration probability and confidence interval
+            // The using statement automatically flushes AND CLOSES the stream and calls IDisposable.Dispose on the stream object
+            // NOTE: do not use FileStream for text files because it writes bytes, but StreamWriter encodes the output as text
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(string.Concat(Environment.CurrentDirectory, "/Visualization/configurations.txt"), false))
             {
-                for(int cID = 0; cID < nrCustomers; cID++)
+                double runsumConfigurationProbability = new double();
+                double runsumConfigurationProbability2 = new double();
+                for (int cID = 0; cID < nrCustomers; cID++)
                 {
-
+                    file.WriteLine("Customer {0}", cID);
+                    file.WriteLine("Configuration\t\tProbability");
+                    foreach (List<int> configuration in possibleConfigurations)
+                    {
+                        runsumConfigurationProbability = 0;
+                        runsumConfigurationProbability2 = 0;
+                        for (int i = 0; i < nrServers; i++) { if (i < configuration.Count) { file.Write("{0} ", configuration[i]); } else { file.Write("x "); } }
+                        for (int r = 0; r < R; r++)
+                        {
+                            runsumConfigurationProbability += configurations[r, cID][configuration];
+                            runsumConfigurationProbability2 += configurations[r, cID][configuration] * configurations[r, cID][configuration];
+                        }
+                        file.Write("\t\t{0} \u00B1 {1} (95% C.I.)", String.Format("{0:0.000}", runsumConfigurationProbability / R), String.Format("{0:0.000}", 1.96 * Math.Sqrt(runsumConfigurationProbability2 / R - runsumConfigurationProbability / R * runsumConfigurationProbability / R) / Math.Sqrt(R)));
+                        file.WriteLine("");
+                    }
                 }
-                
             }
+            // TEST
+            //List<int> aPossibleConfiguration = new List<int>();
+            //for (int sID = 0; sID < nrServers; sID++) { aPossibleConfiguration.Add(sID); }
+            //IEnumerable<IEnumerable<int>> result = GetPermutations(aPossibleConfiguration, nrServers);
+            //foreach (IEnumerable<int> perm in result)
+            //{
+            //    foreach (int sID in perm)
+            //    {
+            //        Console.Write("{0} ", sID);
+            //    }
+            //    Console.Write("\n");
+            //}
         }
 
         private static int Factorial(int number)
