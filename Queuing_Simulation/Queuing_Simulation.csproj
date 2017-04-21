@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -48,6 +47,7 @@
     <Compile Include="Objects\Server.cs" />
     <Compile Include="Objects\ServerQueue.cs" />
     <Compile Include="Results\Results.cs" />
+    <Compile Include="Statistics\ExtensionMethods.cs" />
     <Compile Include="Statistics\Distribution.cs" />
     <Compile Include="Events\Event.cs" />
     <Compile Include="Statistics\ExponentialDistribution.cs" />
@@ -57,6 +57,10 @@
     <Compile Include="Statistics\GammaDistribution.cs" />
     <Compile Include="Statistics\NormalDistribution.cs" />
     <Compile Include="Visualization\VisualizeTIKZ.cs" />
+    <Compile Include="Statistics\GeometricDistribution.cs" />
+    <Compile Include="Statistics\UniformDistribution.cs" />
+    <Compile Include="Statistics\HyperExponentialDistribution.cs" />
+    <Compile Include="Statistics\DeterministicDistribution.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

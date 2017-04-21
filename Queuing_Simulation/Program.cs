@@ -12,6 +12,8 @@ namespace Queuing_Simulation
         {
             Console.WriteLine("{0}QUEUING SIMULATION \n{1}\nInitialization started...", new String('\u2500', 80), new String('\u2500', 80));
 
+			Random rng = new Random();
+
             // Number of runs
             int R = 6;
 
