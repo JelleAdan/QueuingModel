@@ -2,7 +2,7 @@
 
 namespace Queuing_Simulation
 {
-    public abstract class Distribution
+	public abstract class Distribution
     {
         public Random rng { get; set; }
         public double average { get; set; }

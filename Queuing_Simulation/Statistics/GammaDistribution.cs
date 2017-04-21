@@ -2,57 +2,90 @@
 
 namespace Queuing_Simulation
 {
-    public class GammaDistribution : Distribution
-    {
-        private double alpha;
-        private double beta;
-        public GammaDistribution(Random rng, double alpha, double beta)
-        {
-            this.rng = rng;
-            this.alpha = alpha;
-            this.beta = beta;
-            average = alpha / beta;
-            variance = alpha / beta / beta;
-        }
+	public class GammaDistribution : Distribution
+	{
+		private double alpha { get; set; }
+		private double beta { get; set; }
 
-        public override double Next()
-        {
-            int k = (int)Math.Floor(alpha);
-            double a = alpha - k;
-            double y = 0;
-            double e = Math.E;
-            if (a > 0)
-            {
-                while (y == 0)
-                {
-                    double u = rng.NextDouble();
-                    double p = u * (e + a) / e;
-                    if (p <= 1)
-                    {
-                        double x = Math.Pow(p, 1 / a);
-                        double u1 = rng.NextDouble();
-                        if (u1 <= Math.Exp(-x))
-                        { // Accept
-                            y = x;
-                        }
-                    }
-                    else
-                    {
-                        double x = -Math.Log(p / a);
-                        double u1 = rng.NextDouble();
-                        if (u1 <= Math.Pow(x, a - 1))
-                        { // Accept
-                            y = x;
-                        }
-                    }
-                }
-            }
-            double product = 1;
-            for (int i = 0; i < k; i++)
-            {
-                product = product * rng.NextDouble();
-            }
-            return ((y - Math.Log(product)) / beta);
-        }
-    }
+		public GammaDistribution(Random rng, double alpha, double beta)
+		{
+			this.rng = rng;
+			this.alpha = alpha;
+			this.beta = beta;
+			average = alpha / beta;
+			variance = alpha / beta / beta;
+		}
+
+		public override double Next()
+		{
+			double shape = alpha;
+			double scale = 1.0 / beta;
+
+			if (shape < 1)
+			{
+				while (true)
+				{
+					double u = rng.NextDouble();
+					double bGS = 1 + shape / Math.E;
+					double p = bGS * u;
+
+					if (p <= 1)
+					{
+						double x = Math.Pow(p, 1 / shape);
+						double u2 = rng.NextDouble();
+
+						if (u2 > Math.Exp(-x))
+						{
+							continue;
+						}
+						else
+						{
+							return scale * x;
+						}
+					}
+					else
+					{
+						double x = -1 * Math.Log((bGS - p) / shape);
+						double u2 = rng.NextDouble();
+
+						if (u2 > Math.Pow(x, shape - 1))
+						{
+							continue;
+						}
+						else
+						{
+							return scale * x;
+						}
+					}
+				}
+			}
+
+			double d = shape - 0.333333333333333333;
+			double c = 1 / (3 * Math.Sqrt(d));
+
+			while (true)
+			{
+				double x = rng.NextGaussian();
+				double v = (1 + c * x) * (1 + c * x) * (1 + c * x);
+
+				if (v <= 0)
+				{
+					continue;
+				}
+
+				double x2 = x * x;
+				double u = rng.NextDouble();
+
+				if (u < 1 - 0.0331 * x2 * x2)
+				{
+					return scale * d * v;
+				}
+
+				if (Math.Log(u) < 0.5 * x2 + d * (1 - v + Math.Log(v)))
+				{
+					return scale * d * v;
+				}
+			}
+		}
+	}
 }
