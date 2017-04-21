@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Queuing_Simulation
 {
     public class NormalDistribution : Distribution
     {
-        private double mu;
-        private double sigma;
-        public NormalDistribution(Random rng, double mu, double sigma)
+		private double mu { get; set; }
+		private double sigma { get; set; }
+
+		public NormalDistribution(Random rng, double mu, double sigma)
         {
             this.rng = rng;
             this.mu = mu;
@@ -21,8 +18,7 @@ namespace Queuing_Simulation
 
         public override double Next()
         {
-            double tmp = new double();
-            return tmp;
+			return mu + sigma * (Math.Sqrt(-2 * Math.Log(rng.NextDouble())) * Math.Cos(2 * Math.PI * rng.NextDouble()));
         }
     }
 }

@@ -12,12 +12,12 @@ namespace Queuing_Simulation
         {
             Console.WriteLine("{0}QUEUING SIMULATION \n{1}\nInitialization started...", new String('\u2500', 80), new String('\u2500', 80));
 
+			Random rng = new Random();
+
             // Number of runs
             int R = 5;
 
-            Random rng = new Random();
-
-            // Initialize customers
+			// Initialize customers
             double[] arrivalDistributionParameters = new double[] { 1 };
             int customerTypes = arrivalDistributionParameters.Length;
             Distribution[] arrivalDistributions = new Distribution[arrivalDistributionParameters.GetLength(0)];
