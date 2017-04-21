@@ -35,11 +35,8 @@ namespace Queuing_Simulation
                 serviceDistributions[i] = new ExponentialDistribution(rng, serviceDistributionParameters[i]);
             }
 
-            // Determine utilization M|G|c
-            double averageServiceTime = new double();
-            for(int i = 0; i < nrServers; i++) { averageServiceTime += serviceDistributions[i].average; }
-            averageServiceTime = averageServiceTime / nrServers;
-            double utilization = arrivalDistributionParameters[0] * averageServiceTime / nrServers;
+            // Determine utilization M|G|c 
+            double utilization = arrivalDistributionParameters[0] * serviceDistributions[0].average / nrServers;
 
             // Server-Customer Eligibility
             bool[][] eligibility = new bool[nrServers][];
@@ -137,7 +134,7 @@ namespace Queuing_Simulation
 
             Console.WriteLine("Simulation complete. Total elapsed time {0} minutes", elapsedTime / 1000 / 60);
             Console.WriteLine("\n{0}RESULTS\n{0}", new String('\u2500', 80), new String('\u2500', 80));
-            results.GetMeans(arrivalDistributionParameters[0], serviceDistributionParameters[0]);
+            results.GetMeans(arrivalDistributionParameters, serviceDistributionParameters);
             Console.WriteLine("\n{0}", new String('\u2500', 80));
             Visualize:
             Console.WriteLine("Visualize results? (yes/no)");
