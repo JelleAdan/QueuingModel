@@ -18,7 +18,7 @@ namespace Queuing_Simulation
             int R = 6;
 
             // Initialize customers
-            double[] arrivalDistributionParameters = new double[] { 2 };
+            double[] arrivalDistributionParameters = new double[] { 0.1 };
             int nrCustomers = arrivalDistributionParameters.Length;
             Distribution[] arrivalDistributions = new Distribution[arrivalDistributionParameters.GetLength(0)];
             for (int i = 0; i < nrCustomers; i++)
@@ -27,7 +27,7 @@ namespace Queuing_Simulation
             }
 
             // Initialize servers
-            double[] serviceDistributionParameters = new double[] { 1, 1, 1, 1 };
+            double[] serviceDistributionParameters = new double[] { 0.25, 0.25, 0.25, 0.25 };
             int nrServers = serviceDistributionParameters.Length;
             Distribution[] serviceDistributions = new Distribution[serviceDistributionParameters.GetLength(0)];
             for (int i = 0; i < nrServers; i++)
