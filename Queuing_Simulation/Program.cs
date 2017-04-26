@@ -16,7 +16,7 @@ namespace Queuing_Simulation
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            for (double lambda = 0; lambda < 10; lambda = lambda + 0.2)
+            for (double lambda = 0; lambda < 10; lambda = lambda + 0.1)
             {
                 Random rng = new Random();
 
@@ -38,8 +38,9 @@ namespace Queuing_Simulation
                     serviceDistributions[i] = new ExponentialDistribution(rng, serviceDistributionParameters[i]);
                 }
 
-                // Determine utilization M|G|c 
+                // Determine utilization M|G|c and M|M|c
                 double utilization = arrivalDistributionParameters[0] * serviceDistributions[0].average / nrServers;
+                double utilizationMMC = lambda / 2.5 / nrServers;
 
                 // Server-Customer Eligibility
                 bool[][] eligibility = new bool[nrServers][];
@@ -59,8 +60,8 @@ namespace Queuing_Simulation
 
                 Results results = new Results(R, nrServers, nrCustomers);
 
-                Parallel.For(0, R, new ParallelOptions { MaxDegreeOfParallelism = 3 }, r => // MaxDegreeOfParallelism n + 1, where n is the number of cores
-                //for (int r = 0; r < R; r++)
+                //Parallel.For(0, R, new ParallelOptions { MaxDegreeOfParallelism = 3 }, r => // MaxDegreeOfParallelism n + 1, where n is the number of cores
+                for (int r = 0; r < R; r++)
                 {
                     double t = 0;
 
@@ -120,31 +121,14 @@ namespace Queuing_Simulation
                         {
                             Console.WriteLine("Invalid event type.");
                         }
-                        // Show progress in console
-                        //Console.Write("\rRun {0}/{1}\t\tProgress {2}%\t Elapsed time {3} seconds", r + 1, R, Math.Round(t / T * 100, 0), stopwatch.ElapsedMilliseconds / 1000);
                     }
-                    //}
-                });
-                results.GetMeans(utilization, arrivalDistributions, serviceDistributions, false);
+                }
+                //});
+                results.GetMeans(utilization, utilizationMMC);
                 Console.Write("\rUtilization: {0:0.00}", utilization);
             }
 
             Console.WriteLine("\nSimulation complete.\nTotal elapsed time {0:0.00} minutes", stopwatch.ElapsedMilliseconds / 1000 / 60);
-
-            //Visualize:
-            //Console.WriteLine("Visualize results? (yes/no)");
-            //switch (Console.ReadLine())
-            //{
-            //    case "yes":
-            //        Visualization.VisualizeTIKZ.PrintCSV();
-            //        Visualization.VisualizeTIKZ.Visualize();
-            //        break;
-            //    case "no":
-            //        break;
-            //    default:
-            //        Console.Write("Invalid answer. ");
-            //        goto Visualize;
-            //}
 
             Console.WriteLine("\nPress any key to exit...");
             Console.ReadLine();
