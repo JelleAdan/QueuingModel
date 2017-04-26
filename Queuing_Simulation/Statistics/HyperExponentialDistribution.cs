@@ -7,10 +7,10 @@ namespace Queuing_Simulation
 		private double[] lambda { get; set; }
 		private double[] prob { get; set; }
 
-		public HyperExponentialDistribution(Random rng,double[] lambda, double[] prob)
+		public HyperExponentialDistribution(Random rng, double[] lambda, double[] prob)
 		{
 			this.rng = rng;
-			Array.Sort(prob,lambda);
+            Array.Sort(prob, lambda);
 			this.prob = prob;
 			this.lambda = lambda;
 			for (int i = 0; i < prob.Length; i++)
@@ -25,7 +25,6 @@ namespace Queuing_Simulation
 		{
 			double a = rng.NextDouble();
 			int index = 0;
-
 			for (int i = 0; i < prob.Length; i++)
 			{
 				if (a < prob[i])

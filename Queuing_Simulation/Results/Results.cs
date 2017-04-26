@@ -19,7 +19,7 @@ namespace Queuing_Simulation
         private double[] sumLq { get; set; }
         private double[] sumS { get; set; }
         private double[] sumW { get; set; }
-        private double[] wait { get; set; }
+        private double[] nrCustomersWait { get; set; }
         private Dictionary<List<int>, double>[,] configurations { get; set; }
 
         public Results(int R, int nrServers, int nrCustomers)
@@ -34,7 +34,7 @@ namespace Queuing_Simulation
             sumLq = new double[R];
             sumS = new double[R];
             sumW = new double[R];
-            wait = new double[R];
+            nrCustomersWait = new double[R];
             configurations = new Dictionary<List<int>, double>[R, nrCustomers];
             for(int r = 0; r < R; r++)
             {
@@ -80,13 +80,13 @@ namespace Queuing_Simulation
                 sumW[r] += e.customer.serviceTime - e.customer.arrivalTime;
                 if (e.customer.arrivalTime != e.customer.serviceTime)
                 {
-                    wait[r]++;
+                    nrCustomersWait[r]++;
                 }
             }
             time[r] = e.time;
         }
 
-        public void GetMeans(double[] arrivalDistributionParameters, double[] serviceDistributionParameters)
+        public void GetMeans(double utilization, Distribution[] arrivalDistributions, Distribution[] serviceDistributions, bool display = true)
         {
             int[] nrArrivalsTotal = new int[R];
             int[] nrDeparturesTotal = new int[R];
@@ -120,8 +120,8 @@ namespace Queuing_Simulation
                 runsumS2 += sumS[r] / nrDeparturesTotal[r] * sumS[r] / nrDeparturesTotal[r];
                 runsumW += sumW[r] / nrDeparturesTotal[r];
                 runsumW2 += sumW[r] / nrDeparturesTotal[r] * sumW[r] / nrDeparturesTotal[r];
-                runsumPW += wait[r] / nrDeparturesTotal[r];
-                runsumPW2 += wait[r] / nrDeparturesTotal[r] * wait[r] / nrDeparturesTotal[r];
+                runsumPW += nrCustomersWait[r] / nrDeparturesTotal[r];
+                runsumPW2 += nrCustomersWait[r] / nrDeparturesTotal[r] * nrCustomersWait[r] / nrDeparturesTotal[r];
             }
 
             double meanLs = runsumLs / R;
@@ -147,8 +147,8 @@ namespace Queuing_Simulation
             // Theoretic M|M|c
             // Only works when all lambda and mu are identical!
             #region
-            double lambda = arrivalDistributionParameters[0];
-            double mu = serviceDistributionParameters[0];
+            double lambda = 1 / arrivalDistributions[0].average;
+            double mu = 1 / serviceDistributions[0].average;
             double rho = lambda / mu / nrServers;
             double tmp = new double();
             if (nrServers > 1)
@@ -171,13 +171,17 @@ namespace Queuing_Simulation
             double theoreticS = (rho / (1 - rho) * theoreticPW + nrServers * rho) / lambda;
             #endregion
 
-            Console.WriteLine("\t\t\t\tSimulation\t\t\tTheoretic");
-            Console.WriteLine("E(customers in the system):\t{0} \u00B1 {1} (95% C.I.)\t{2}", String.Format("{0:0.0000}", meanLs), String.Format("{0:0.0000}", ciLs), String.Format("{0:0.0000}", theoreticLs));
-            Console.WriteLine("E(customers in the queue):\t{0} \u00B1 {1} (95% C.I.)\t{2}", String.Format("{0:0.0000}", meanLq), String.Format("{0:0.0000}", ciLq), String.Format("{0:0.0000}", theoreticLq));
-            Console.WriteLine("E(sojourn time):\t\t{0} \u00B1 {1} (95% C.I.)\t{2}", String.Format("{0:0.0000}", meanS), String.Format("{0:0.0000}", ciS), String.Format("{0:0.0000}", theoreticS));
-            Console.WriteLine("E(waiting time):\t\t{0} \u00B1 {1} (95% C.I.)\t{2}", String.Format("{0:0.0000}", meanW), String.Format("{0:0.0000}", ciW), String.Format("{0:0.0000}", theoreticW));
-            Console.WriteLine("P(wait):\t\t\t{0} \u00B1 {1} (95% C.I.)\t{2}", String.Format("{0:0.0000}", meanPW), String.Format("{0:0.0000}", ciPW), String.Format("{0:0.0000}", theoreticPW));
-            
+            if(display)
+            {
+                Console.WriteLine("\n{0}RESULTS\n{0}", new String('\u2500', 80), new String('\u2500', 80));
+                Console.WriteLine("\t\t\t\tSimulation\t\t\tTheoretic");
+                Console.WriteLine("E(customers in the system):\t{0:0.0000} \u00B1 {1:0.0000} (95% C.I.)\t{2:0.0000}", meanLs, ciLs, theoreticLs);
+                Console.WriteLine("E(customers in the queue):\t{0:0.0000} \u00B1 {1:0.0000} (95% C.I.)\t{2:0.0000}", meanLq, ciLq, theoreticLq);
+                Console.WriteLine("E(sojourn time):\t\t{0:0.0000} \u00B1 {1:0.0000} (95% C.I.)\t{2:0.0000}", meanS, ciS, theoreticS);
+                Console.WriteLine("E(waiting time):\t\t{0:0.0000} \u00B1 {1:0.0000} (95% C.I.)\t{2:0.0000}", meanW, ciW, theoreticW);
+                Console.WriteLine("P(wait):\t\t\t{0:0.0000} \u00B1 {1:0.0000} (95% C.I.)\t{2:0.0000}", meanPW, ciPW, theoreticPW);
+            }
+
             // The using statement automatically flushes AND CLOSES the stream and calls 
             // IDisposable.Dispose on the stream object.
             // Second argument StreamWriter: true = append / false = overwrite
@@ -191,12 +195,12 @@ namespace Queuing_Simulation
                 file.WriteLine("P(wait):\t\t\t{0} \u00B1 {1} (95% C.I.)\t{2}", String.Format("{0:0.00000000}", meanPW), String.Format("{0:0.00000000}", ciPW), String.Format("{0:0.00000000}", theoreticPW));
             }
 
-            using(System.IO.StreamWriter file = new System.IO.StreamWriter(string.Concat(Environment.CurrentDirectory, "/Visualization/waitingtimeversusutilization.txt"), true))
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(string.Concat(Environment.CurrentDirectory, "/Visualization/Measures_VS_Utilization.csv"), true))
             {
-                file.WriteLine("{0}, {1}", String.Format("{0:0.000)", utilization), String.Format("{0:0.000}", meanW));
+                file.WriteLine("\n{0}, {1}, {2}, {3}, {4}, {5}", utilization, meanW, meanS, meanLq, meanLs, meanPW);
             }
 
-            PrintConfigurations();
+            //PrintConfigurations();
         }
 
         static IEnumerable<IEnumerable<T>> GetPermutations<T>(IEnumerable<T> list, int length)
@@ -211,11 +215,6 @@ namespace Queuing_Simulation
             return GetPermutationsWithRepetition(list, length - 1).SelectMany(t => list, (t1, t2) => t1.Concat(new T[] { t2 }));
         }
 
-        //static T ElementAtOrDefault<T>(this IList<T> list, int index, T @default)
-        //{
-        //    return index >= 0 && index < list.Count ? list[index] : @default;
-        //}
-
         public void PrintConfigurations()
         {
             // Determine all possible configurations
@@ -223,7 +222,6 @@ namespace Queuing_Simulation
             for (int i = 2; i <= nrServers; i++) { tmp += 1.0 / Factorial(i); }
             int nrConfigurations = (int)(2 * Factorial(nrServers) + Factorial(nrServers) * tmp);
             HashSet<List<int>> possibleConfigurations = new HashSet<List<int>>();
-            //new ListComparer<int>()
             for (int r = 0; r < R; r++) 
             {
                 for (int cID = 0; cID < nrCustomers; cID++) 
@@ -273,18 +271,6 @@ namespace Queuing_Simulation
                     }
                 }
             }
-            // TEST
-            //List<int> aPossibleConfiguration = new List<int>();
-            //for (int sID = 0; sID < nrServers; sID++) { aPossibleConfiguration.Add(sID); }
-            //IEnumerable<IEnumerable<int>> result = GetPermutations(aPossibleConfiguration, nrServers);
-            //foreach (IEnumerable<int> perm in result)
-            //{
-            //    foreach (int sID in perm)
-            //    {
-            //        Console.Write("{0} ", sID);
-            //    }
-            //    Console.Write("\n");
-            //}
         }
 
         private static int Factorial(int number)
