@@ -19,9 +19,10 @@ namespace Queuing_Simulation
 				variance += prob[i] / lambda[i] / lambda[i];
 			}
 			variance = 2 * variance - average * average;
-		}
+            residual = (variance + average * average) / (2 * average);
+        }
 
-		public override double Next()
+        public override double Next()
 		{
 			double a = rng.NextDouble();
 			int index = 0;

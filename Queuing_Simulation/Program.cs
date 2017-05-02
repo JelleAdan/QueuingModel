@@ -10,16 +10,25 @@ namespace Queuing_Simulation
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("{0}QUEUING SIMULATION\n{0}", new String('\u2500', 80));
+            Console.WriteLine("QUEUING SIMULATION", new String('\u2500', 80)); 
 
             Console.WriteLine("Simulation started...");
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            for (double lambda = 0; lambda < 10; lambda = lambda + 0.1)
+            // Create a directory and file to print the results
+            string path = string.Concat(Environment.CurrentDirectory, "/Results/");
+            System.IO.Directory.CreateDirectory(path);
+            string filename = string.Concat(path, "Results_H.csv");
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(filename, true))
+            {
+                file.WriteLine("utilization,meanW,meanS,meanLq,meanLs,meanPW,theoreticPWMMC,meanWEstimation");
+            }
+
+            for (double lambda = 0.1; lambda < 4; lambda = lambda + 0.1)
             {
                 Random rng = new Random();
-
+                 
                 // Initialize customers
                 double[] arrivalDistributionParameters = new double[] { lambda };
                 int nrCustomers = arrivalDistributionParameters.Length;
@@ -30,17 +39,22 @@ namespace Queuing_Simulation
                 }
 
                 // Initialize servers
-                double[] serviceDistributionParameters = new double[] { 2.5, 2.5, 2.5, 2.5 };
-                int nrServers = serviceDistributionParameters.Length;
+                //double[] serviceDistributionParameters = new double[] { 1, 1, 1, 1 };
+                //double[,] serviceDistributionParameters = new double[,] { { 0, 2 }, { 0, 2 }, { 0, 2 }, { 0, 2 } };
+                //double[] serviceDistributionParameters = new double[] { 1, 1, 1, 1 };
+                double[,] serviceDistributionParameters = new double[,] { { 1, 2 }, { 1, 2 }, { 1, 2 }, { 1, 2 } };
+                int nrServers = serviceDistributionParameters.GetLength(0);
                 Distribution[] serviceDistributions = new Distribution[nrServers];
                 for (int i = 0; i < nrServers; i++)
                 {
-                    serviceDistributions[i] = new ExponentialDistribution(rng, serviceDistributionParameters[i]);
+                    //serviceDistributions[i] = new DeterministicDistribution(rng, serviceDistributionParameters[i]);
+                    //serviceDistributions[i] = new UniformDistribution(rng, serviceDistributionParameters[i, 0], serviceDistributionParameters[i, 1]);
+                    //serviceDistributions[i] = new ExponentialDistribution(rng, serviceDistributionParameters[i]);
+                    serviceDistributions[i] = new Hyper2ExponentialDistribution(rng, serviceDistributionParameters[i, 0], serviceDistributionParameters[i, 1]);
                 }
 
                 // Determine utilization M|G|c and M|M|c
                 double utilization = arrivalDistributionParameters[0] * serviceDistributions[0].average / nrServers;
-                double utilizationMMC = lambda / 2.5 / nrServers;
 
                 // Server-Customer Eligibility
                 bool[][] eligibility = new bool[nrServers][];
@@ -56,9 +70,9 @@ namespace Queuing_Simulation
 
                 // Runs (Number and time span resp.)
                 int R = 6;
-                double T = 10E3;
+                double T = 1E7;
 
-                Results results = new Results(R, nrServers, nrCustomers);
+                Results results = new Results(R, nrServers, nrCustomers, filename);
 
                 //Parallel.For(0, R, new ParallelOptions { MaxDegreeOfParallelism = 3 }, r => // MaxDegreeOfParallelism n + 1, where n is the number of cores
                 for (int r = 0; r < R; r++)
@@ -85,7 +99,6 @@ namespace Queuing_Simulation
                     {
                         Event e = futureEvents.Next();
                         t = e.time;
-
                         results.Register(r, e, customerQueue, idleServerQueue);
 
                         if (e.type == Event.ARRIVAL)
@@ -124,14 +137,10 @@ namespace Queuing_Simulation
                     }
                 }
                 //});
-                results.GetMeans(utilization, utilizationMMC);
+                results.GetMeans(utilization, serviceDistributions[0].residual);
                 Console.Write("\rUtilization: {0:0.00}", utilization);
             }
-
             Console.WriteLine("\nSimulation complete.\nTotal elapsed time {0:0.00} minutes", stopwatch.ElapsedMilliseconds / 1000 / 60);
-
-            Console.WriteLine("\nPress any key to exit...");
-            Console.ReadLine();
         }
     }
 }

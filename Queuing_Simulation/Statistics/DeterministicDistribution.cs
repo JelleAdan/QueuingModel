@@ -12,6 +12,7 @@ namespace Queuing_Simulation
 			this.serviceTime = serviceTime;
 			average = serviceTime;
 			variance = 0;
+            residual = (variance + average * average) / (2 * average);
 		}
 
 		public override double Next()

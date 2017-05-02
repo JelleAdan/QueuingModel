@@ -14,9 +14,10 @@ namespace Queuing_Simulation
 			this.b = b;
 			average = 0.5 * (a + b);
 			variance = (1 / 12) * (b - a) * (b - a);
-		}
+            residual = (variance + average * average) / (2 * average);
+        }
 
-		public override double Next()
+        public override double Next()
 		{
 			return a + (b - a) * rng.NextDouble();
 		}

@@ -10,11 +10,12 @@ namespace Queuing_Simulation
 		{
 			this.rng = rng;
 			this.p = p;
-			average = p;
-			variance = p;
-		}
+			average = 1 / p;
+            variance = (1 - p) / p / p;
+            residual = (variance + average * average) / (2 * average);
+        }
 
-		public override double Next()
+        public override double Next()
 		{
 			return Math.Log(rng.NextDouble()) / Math.Log(1 - p);
 		}

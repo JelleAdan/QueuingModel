@@ -14,9 +14,10 @@ namespace Queuing_Simulation
 			this.beta = beta;
 			average = alpha / beta;
 			variance = alpha / beta / beta;
-		}
+            residual = (variance + average * average) / (2 * average);
+        }
 
-		public override double Next()
+        public override double Next()
 		{
 			double shape = alpha;
 			double scale = 1.0 / beta;

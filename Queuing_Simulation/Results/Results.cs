@@ -12,6 +12,7 @@ namespace Queuing_Simulation
         private int R { get; set; }
         private int nrServers { get; set; }
         private int nrCustomers { get; set; }
+        private string filename { get; set; }
         private int[,] nrArrivals { get; set; }
         private int[,] nrDepartures { get; set; }
         private double[] time { get; set; }
@@ -22,11 +23,12 @@ namespace Queuing_Simulation
         private double[] nrCustomersWait { get; set; }
         private Dictionary<List<int>, double>[,] configurations { get; set; }
 
-        public Results(int R, int nrServers, int nrCustomers)
+        public Results(int R, int nrServers, int nrCustomers, string filename)
         {
             this.R = R;
             this.nrServers = nrServers;
             this.nrCustomers = nrCustomers;
+            this.filename = filename;
             nrArrivals = new int[R, nrCustomers];
             nrDepartures = new int[R, nrCustomers];
             time = new double[R];
@@ -47,6 +49,10 @@ namespace Queuing_Simulation
 
         public void Register(int r, Event e, CustomerQueue customerQueue, ServerQueue idleServerQueue)
         {
+            if (Double.IsInfinity(e.time) || Double.IsNaN(sumW[r]) || Double.IsNaN(sumS[r]) || Double.IsNaN(sumLq[r]) || Double.IsNaN(sumLs[r]) || Double.IsNaN(nrCustomersWait[r]))
+            {
+                Console.Write("Error encountered.");
+            }
             sumLs[r] += customerQueue.GetLength() * (e.time - time[r]);
             sumLq[r] += (customerQueue.GetLength() - (nrServers - idleServerQueue.GetLength())) * (e.time - time[r]);
             if (e.type == Event.ARRIVAL)
@@ -86,7 +92,7 @@ namespace Queuing_Simulation
             time[r] = e.time;
         }
 
-        public void GetMeans(double utilization, double utilizationMMC, bool display = false)
+        public void GetMeans(double utilization, double residual, bool display = false)
         {
             int[] nrArrivalsTotal = new int[R];
             int[] nrDeparturesTotal = new int[R];
@@ -151,14 +157,15 @@ namespace Queuing_Simulation
             {
                 for (int k = 0; k < nrServers; k++)
                 {
-                    tmp += Math.Pow(nrServers * utilizationMMC, k) / Factorial(k);
+                    tmp += Math.Pow(nrServers * utilization, k) / Factorial(k);
                 }
             }
             else
             {
                 tmp = 1;
             }
-            double theoreticPWMMC = Math.Pow(nrServers * utilizationMMC, nrServers) / Factorial(nrServers) / ((1 - utilizationMMC) * tmp + Math.Pow(nrServers * utilizationMMC, nrServers) / Factorial(nrServers));
+            double theoreticPWMMC = Math.Pow(nrServers * utilization, nrServers) / Factorial(nrServers) / ((1 - utilization) * tmp + Math.Pow(nrServers * utilization, nrServers) / Factorial(nrServers));
+            double meanWEstimation = theoreticPWMMC / (1 - utilization) * residual / nrServers;
             #endregion
 
             if (display)
@@ -172,25 +179,18 @@ namespace Queuing_Simulation
                 Console.WriteLine("P(wait):\t\t\t{0:0.0000} \u00B1 {1:0.0000} (95% C.I.)", meanPW, ciPW);
             }
 
-            using (System.IO.StreamWriter file = new System.IO.StreamWriter(string.Concat(Environment.CurrentDirectory, "/Visualization/Measures_VS_Utilization.csv"), true))
+            if(Double.IsNaN(meanW) || Double.IsNaN(meanS) || Double.IsNaN(meanLq) || Double.IsNaN(meanLs) || Double.IsNaN(meanPW))
             {
-                file.WriteLine("\n{0:0.0000}, {1:0.0000}, {2:0.0000}, {3:0.0000}, {4:0.0000}, {5:0.0000}, {6:0.0000}", 
-                    utilization, meanW, meanS, meanLq, meanLs, meanPW, theoreticPWMMC);
+                Console.Write("Error encountered.");
+            }
+
+            using (System.IO.StreamWriter file = new System.IO.StreamWriter(filename, true))
+            {
+                file.WriteLine("{0:0.0000},{1:0.0000},{2:0.0000},{3:0.0000},{4:0.0000},{5:0.0000},{6:0.0000},{7:0.0000}", 
+                    utilization, meanW, meanS, meanLq, meanLs, meanPW, theoreticPWMMC, meanWEstimation);
             }
 
             //PrintConfigurations();
-        }
-
-        static IEnumerable<IEnumerable<T>> GetPermutations<T>(IEnumerable<T> list, int length)
-        {
-            if (length == 1) return list.Select(t => new T[] { t });
-            return GetPermutations(list, length - 1).SelectMany(t => list.Where(e => !t.Contains(e)), (t1, t2) => t1.Concat(new T[] { t2 }));
-        }
-
-        static IEnumerable<IEnumerable<T>> GetPermutationsWithRepetition<T>(IEnumerable<T> list, int length)
-        {
-            if (length == 1) return list.Select(t => new T[] { t });
-            return GetPermutationsWithRepetition(list, length - 1).SelectMany(t => list, (t1, t2) => t1.Concat(new T[] { t2 }));
         }
 
         public void PrintConfigurations()

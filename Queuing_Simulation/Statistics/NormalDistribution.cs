@@ -14,6 +14,7 @@ namespace Queuing_Simulation
             this.sigma = sigma;
             average = mu;
             variance = sigma * sigma;
+            residual = (variance + average * average) / (2 * average);
         }
 
         public override double Next()

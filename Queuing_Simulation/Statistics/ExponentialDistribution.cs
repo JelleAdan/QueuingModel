@@ -12,11 +12,14 @@ namespace Queuing_Simulation
             this.lambda = lambda;
             average = 1 / lambda;
             variance = 1 / lambda / lambda;
+            residual = (variance + average * average) / (2 * average);
         }
 
         public override double Next()
         {
-			return -Math.Log(rng.NextDouble()) / lambda;
+            double sample = rng.NextDouble();
+            while (sample == 0.0) { sample = rng.NextDouble(); }
+			return -Math.Log(sample) / lambda;
         }
     }
 }
