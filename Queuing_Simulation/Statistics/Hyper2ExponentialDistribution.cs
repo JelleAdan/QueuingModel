@@ -11,7 +11,7 @@ namespace Queuing_Simulation
         {
             this.rng = rng;
             prob = new double[2];
-            prob[0] = 0.5 * (1 + Math.Sqrt((Math.Pow(cvar, 2) - 1) / (Math.Pow(cvar, 2) + 1)));
+            prob[0] = 0.5 * (1 + Math.Sqrt((Math.Pow(cvar, 2) - 1) / (Math.Pow(cvar, 2) + 1))); // Balanced means
             prob[1] = 1 - prob[0];
             lambda = new double[2];
             lambda[0] = 2 * prob[0] / average;
@@ -26,15 +26,23 @@ namespace Queuing_Simulation
         {
             double a = rng.NextDouble();
             int index = 0;
-            for (int i = 0; i < prob.Length; i++)
+            if(a < prob[0])
             {
-                if (a < prob[i])
-                {
-                    index = i;
-                    break;
-                }
+                index = 0;
             }
-            return -Math.Log(rng.NextDouble()) / lambda[index];
+            else
+            {
+                index = 1;
+            }
+            //for (int i = 0; i < prob.Length; i++)
+            //{
+            //    if (a < prob[i])
+            //    {
+            //        index = i;
+            //        break;
+            //    }
+            //}
+            return -Math.Log(rng.MyNextDouble()) / lambda[index];
         }
     }
 }

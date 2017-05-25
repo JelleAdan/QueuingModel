@@ -1,0 +1,114 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage{pgfplots}
+\begin{document}
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      ylabel=E(W),
+      xlabel=$\rho$,
+      width=0.75\linewidth,
+      legend cell align=left,
+      legend pos=north west]
+      \addplot+[no marks] table [x=utilization, y=meanW, col sep=comma] {Results_D.csv};
+      \addplot+[no marks] table [x=utilization, y=meanW, col sep=comma] {Results_U.csv};
+      \addplot+[no marks] table [x=utilization, y=meanW, col sep=comma] {Results_E.csv};
+      \addplot+[no marks] table [x=utilization, y=meanW, col sep=comma] {Results_H.csv};
+      \legend{$D(1)$, {$U(0,2)$}, $Exp(1)$, $H_2(1)$}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{$E(W)$ for deterministic, uniformly, exponential and hyperexponential distributed service times. Four servers with $E(B) = 1$. Utilization $\rho$ varies between 0.05 and 0.95. Six simulation runs of length $10^6$ were performed for each $\rho$.}\label{fig:somegraph}
+\end{figure}
+
+\newpage
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      ylabel=E(W),
+      xlabel=$\rho$,
+      width=0.75\linewidth,
+      legend cell align=left,
+      legend pos=north west]
+      \addplot[blue] table [x=utilization, y=meanW, col sep=comma] {Results_D.csv};
+      \addplot[red] table [x=utilization, y=meanWEstimation, col sep=comma] {Results_D.csv};
+      \legend{Sim.,Approx.}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Deterministic distributed service times according to simulation and approximation. $E(W) = \frac{\Pi_W^{M|M|c}}{1-\rho} \frac{E(R)}{c}$. Six simulation runs of length $10^6$ were performed for each $\rho$.}\label{fig:somegraph}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      ylabel=E(W),
+      xlabel=$\rho$,
+      width=0.75\linewidth,
+      legend cell align=left,
+      legend pos=north west]
+      \addplot[blue] table [x=utilization, y=meanW, col sep=comma] {Results_U.csv};
+      \addplot[red] table [x=utilization, y=meanWEstimation, col sep=comma] {Results_U.csv};
+      \legend{Sim.,Approx.}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Uniformly distributed service times according to simulation and approximation. $E(W) = \frac{\Pi_W^{M|M|c}}{1-\rho} \frac{E(R)}{c}$. Six simulation runs of length $10^6$ were performed for each $\rho$.}\label{fig:somegraph}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      ylabel=E(W),
+      xlabel=$\rho$,
+      width=0.75\linewidth,
+      legend cell align=left,
+      legend pos=north west]
+      \addplot[blue] table [x=utilization, y=meanW, col sep=comma] {Results_E.csv};
+      \addplot[red] table [x=utilization, y=meanWEstimation, col sep=comma] {Results_E.csv};
+      \legend{Sim.,Approx.}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Exponential distributed service times according to simulation and approximation. $E(W) = \frac{\Pi_W^{M|M|c}}{1-\rho} \frac{E(R)}{c}$. Six simulation runs of length $10^6$ were performed for each $\rho$.}\label{fig:somegraph}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      ylabel=E(W),
+      xlabel=$\rho$,
+      width=0.75\linewidth,
+      legend cell align=left,
+      legend pos=north west]
+      \addplot[blue] table [x=utilization, y=meanW, col sep=comma] {Results_H.csv};
+      \addplot[red] table [x=utilization, y=meanWEstimation, col sep=comma] {Results_H.csv};
+      \legend{Sim.,Approx.}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Hyperexponentially distributed service times according to simulation and approximation. $E(W) = \frac{\Pi_W^{M|M|c}}{1-\rho} \frac{E(R)}{c}$. Six simulation runs of length $10^6$ were performed for each $\rho$.}\label{fig:somegraph}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      ylabel=$\Pi_W$,
+      xlabel=$\rho$,
+      width=0.75\linewidth,
+      legend cell align=left,
+      legend pos=north west]
+      \addplot+[no marks] table [x=utilization, y=meanPW, col sep=comma] {Results_D.csv};
+      \addplot+[no marks] table [x=utilization, y=meanPW, col sep=comma] {Results_U.csv};
+      \addplot+[no marks] table [x=utilization, y=meanPW, col sep=comma] {Results_E.csv};
+      \addplot+[no marks] table [x=utilization, y=meanPW, col sep=comma] {Results_H.csv};
+      \legend{$D(1)$, {$U(0,2)$}, $Exp(1)$, $H_2(1)$}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{$\Pi_W$ for deterministic, uniformly, exponential and hyperexponential distributed service times. Four servers with $E(B) = 1$. Utilization $\rho$ varies between 0.05 and 0.95. Six simulation runs of length $10^6$ were performed for each $\rho$.}\label{fig:somegraph}
+\end{figure}
+
+
+\end{document} 

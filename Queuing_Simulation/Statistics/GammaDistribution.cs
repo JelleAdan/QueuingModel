@@ -26,7 +26,7 @@ namespace Queuing_Simulation
 			{
 				while (true)
 				{
-					double u = rng.NextDouble();
+					double u = rng.MyNextDouble();
 					double bGS = 1 + shape / Math.E;
 					double p = bGS * u;
 
@@ -47,7 +47,7 @@ namespace Queuing_Simulation
 					else
 					{
 						double x = -1 * Math.Log((bGS - p) / shape);
-						double u2 = rng.NextDouble();
+						double u2 = rng.MyNextDouble();
 
 						if (u2 > Math.Pow(x, shape - 1))
 						{

@@ -48,7 +48,6 @@
     <Compile Include="Objects\Server.cs" />
     <Compile Include="Objects\ServerQueue.cs" />
     <Compile Include="Results\Results.cs" />
-    <Compile Include="Statistics\ExtensionMethods.cs" />
     <Compile Include="Statistics\Distribution.cs" />
     <Compile Include="Events\Event.cs" />
     <Compile Include="Statistics\ExponentialDistribution.cs" />
@@ -57,6 +56,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Statistics\GammaDistribution.cs" />
     <Compile Include="Statistics\Hyper2ExponentialDistribution.cs" />
+    <Compile Include="Statistics\MyRandom.cs" />
     <Compile Include="Statistics\NormalDistribution.cs" />
     <Compile Include="Visualization\VisualizeTIKZ.cs" />
     <Compile Include="Statistics\GeometricDistribution.cs" />

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace Queuing_Simulation
 {
@@ -17,9 +18,7 @@ namespace Queuing_Simulation
 
         public override double Next()
         {
-            double sample = rng.NextDouble();
-            while (sample == 0.0) { sample = rng.NextDouble(); }
-			return -Math.Log(sample) / lambda;
+            return -Math.Log(rng.MyNextDouble()) / lambda;
         }
     }
 }

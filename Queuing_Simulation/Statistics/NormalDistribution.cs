@@ -19,7 +19,7 @@ namespace Queuing_Simulation
 
         public override double Next()
         {
-            return mu + sigma * (Math.Sqrt(-2 * Math.Log(rng.NextDouble())) * Math.Cos(2 * Math.PI * rng.NextDouble()));
+            return mu + sigma * (Math.Sqrt(-2 * Math.Log(rng.MyNextDouble())) * Math.Cos(2 * Math.PI * rng.MyNextDouble()));
         }
     }
 }

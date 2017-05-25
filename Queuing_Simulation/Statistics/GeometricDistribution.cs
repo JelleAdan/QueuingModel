@@ -17,7 +17,7 @@ namespace Queuing_Simulation
 
         public override double Next()
 		{
-			return Math.Log(rng.NextDouble()) / Math.Log(1 - p);
+			return Math.Log(rng.MyNextDouble()) / Math.Log(1 - p);
 		}
 	}
 }

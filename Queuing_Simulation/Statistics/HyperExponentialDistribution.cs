@@ -24,7 +24,7 @@ namespace Queuing_Simulation
 
         public override double Next()
 		{
-			double a = rng.NextDouble();
+			double a = rng.MyNextDouble();
 			int index = 0;
 			for (int i = 0; i < prob.Length; i++)
 			{
@@ -34,7 +34,7 @@ namespace Queuing_Simulation
 					break;
 				}
 			}
-			return -Math.Log(rng.NextDouble()) / lambda[index];
+			return -Math.Log(rng.MyNextDouble()) / lambda[index];
 		}
 	}
 }

@@ -49,16 +49,12 @@ namespace Queuing_Simulation
 
         public void Register(int r, Event e, CustomerQueue customerQueue, ServerQueue idleServerQueue)
         {
-            if (Double.IsInfinity(e.time) || Double.IsNaN(sumW[r]) || Double.IsNaN(sumS[r]) || Double.IsNaN(sumLq[r]) || Double.IsNaN(sumLs[r]) || Double.IsNaN(nrCustomersWait[r]))
-            {
-                Console.Write("Error encountered.");
-            }
             sumLs[r] += customerQueue.GetLength() * (e.time - time[r]);
             sumLq[r] += (customerQueue.GetLength() - (nrServers - idleServerQueue.GetLength())) * (e.time - time[r]);
             if (e.type == Event.ARRIVAL)
             {
                 nrArrivals[r, e.customer.cID]++;
-                List<int> tmp = new List<int>();
+                List<int> tmp = new List<int>(nrServers - idleServerQueue.list.Count);
                 foreach(Customer customer in customerQueue.list)
                 {
                     if(customer.server != null)
@@ -177,11 +173,6 @@ namespace Queuing_Simulation
                 Console.WriteLine("E(sojourn time):\t\t{0:0.0000} \u00B1 {1:0.0000} (95% C.I.)", meanS, ciS);
                 Console.WriteLine("E(waiting time):\t\t{0:0.0000} \u00B1 {1:0.0000} (95% C.I.)", meanW, ciW);
                 Console.WriteLine("P(wait):\t\t\t{0:0.0000} \u00B1 {1:0.0000} (95% C.I.)", meanPW, ciPW);
-            }
-
-            if(Double.IsNaN(meanW) || Double.IsNaN(meanS) || Double.IsNaN(meanLq) || Double.IsNaN(meanLs) || Double.IsNaN(meanPW))
-            {
-                Console.Write("Error encountered.");
             }
 
             using (System.IO.StreamWriter file = new System.IO.StreamWriter(filename, true))
